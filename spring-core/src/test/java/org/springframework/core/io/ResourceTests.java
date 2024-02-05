@@ -32,6 +32,7 @@ import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,6 +52,7 @@ class ResourceTests {
 	@Test
 	void byteArrayResource() throws IOException {
 		Resource resource = new ByteArrayResource("testString".getBytes());
+		System.out.println(resource.contentLength());
 		assertThat(resource.exists()).isTrue();
 		assertThat(resource.isOpen()).isFalse();
 		String content = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));

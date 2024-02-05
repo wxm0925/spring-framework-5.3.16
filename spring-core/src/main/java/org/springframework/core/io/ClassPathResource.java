@@ -52,6 +52,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	private Class<?> clazz;
 
 
+
 	/**
 	 * Create a new {@code ClassPathResource} for {@code ClassLoader} usage.
 	 * A leading slash will be removed, as the ClassLoader resource access

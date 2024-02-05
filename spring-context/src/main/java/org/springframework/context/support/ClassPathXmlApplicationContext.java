@@ -57,6 +57,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 
 	/**
 	 * Create a new ClassPathXmlApplicationContext for bean-style configuration.
+	 * 为 bean 样式配置创建一个新的 ClassPathXmlApplicationContext。
 	 * @see #setConfigLocation
 	 * @see #setConfigLocations
 	 * @see #afterPropertiesSet()
@@ -78,6 +79,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	/**
 	 * Create a new ClassPathXmlApplicationContext, loading the definitions
 	 * from the given XML file and automatically refreshing the context.
+	 * 创建一个新的 ClassPathXmlApplicationContext，从给定的 XML 文件加载定义并自动刷新上下文。
 	 * @param configLocation resource location
 	 * @throws BeansException if context creation failed
 	 */
@@ -209,4 +211,9 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 		return this.configResources;
 	}
 
+
+	@Override
+	protected void initPropertySources() {
+		System.out.println("fffffffffffff");
+	}
 }
