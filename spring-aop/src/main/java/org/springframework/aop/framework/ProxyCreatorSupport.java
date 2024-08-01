@@ -37,6 +37,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	private final List<AdvisedSupportListener> listeners = new ArrayList<>();
 
 	/** Set to true when the first AOP proxy has been created. */
+	/** 创建第一个 AOP 代理时设置为 true。 */
 	private boolean active = false;
 
 
@@ -102,7 +103,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 		if (!this.active) {
 			activate();
 		}
-		return getAopProxyFactory().createAopProxy(this);
+		return this.aopProxyFactory.createAopProxy(this);
 	}
 
 	/**

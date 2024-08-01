@@ -515,8 +515,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	//---------------------------------------------------------------------
 
 	/**
-	 * Central method of this class: creates a bean instance,
-	 * populates the bean instance, applies post-processors, etc.
+	 * 此类的核心方法：创建 bean 实例、
+	 * 填充 bean 实例、应用后处理器等
 	 * @see #doCreateBean
 	 */
 	@Override
@@ -547,6 +547,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
+			//让 BeanPostProcessor 如果是用比较原始的DefaultAdvisorAutoProxyCreator（spring1.2版本）aop方式，在这里有机会返回代理而不是目标 bean 实例，代理对象就是在这里生成的，
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {

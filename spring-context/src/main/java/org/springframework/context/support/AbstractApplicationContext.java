@@ -546,10 +546,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		synchronized (this.startupShutdownMonitor) {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
-			// Prepare this context for refreshing.
+			// 准备此上下文以供刷新。
 			prepareRefresh();
 
-			// Tell the subclass to refresh the internal bean factory.
+			// 告诉子类刷新内部bean工厂。
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
@@ -567,7 +567,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
-				// Initialize message source for this context.
+				// 初始化国际化资源，其实就是把name=messageSource的bean给自己的属性
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
@@ -713,7 +713,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
 		}
 
-		// Register default environment beans.
+		// Register default environment beans. 注册默认的环境Bean
 		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
 			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
 		}
@@ -886,7 +886,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Finish the initialization of this context's bean factory,
-	 * initializing all remaining singleton beans.
+	 * initializing all remaining singleton beans. 完成此上下文的 bean 工厂的初始化，初始化所有剩余的单例 bean。
 	 */
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
 		// Initialize conversion service for this context.
@@ -896,9 +896,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
 		}
 
-		// Register a default embedded value resolver if no BeanFactoryPostProcessor
-		// (such as a PropertySourcesPlaceholderConfigurer bean) registered any before:
-		// at this point, primarily for resolution in annotation attribute values.
+		//如果之前没有注册任何 BeanFactoryPostProcessor
+		//（例如 PropertySourcesPlaceholderConfigurer bean），
+		//则注册默认嵌入值解析器：此时，主要用于注释属性值中的解析。
 		if (!beanFactory.hasEmbeddedValueResolver()) {
 			beanFactory.addEmbeddedValueResolver(strVal -> getEnvironment().resolvePlaceholders(strVal));
 		}

@@ -10,7 +10,9 @@ pluginManagement {
 
 plugins {
 	id "com.gradle.enterprise" version "3.8.1"
+/*
 	id "io.spring.ge.conventions" version "0.0.9"
+*/
 }
 
 include "spring-aop"
@@ -59,4 +61,5 @@ settings.gradle.projectsLoaded {
 	}
 }
 include 'spring-demo'
+include 'learn-mvc-01'
 

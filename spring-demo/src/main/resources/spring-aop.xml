@@ -1,0 +1,21 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- 配置目标对象 -->
+	<bean id="myService" class="aop.MyService"/>
+	
+	<!-- 配置自定义通知 -->
+	<bean id="logingAdcive" class="aop.LogingAdcive"/>
+	
+	<!-- 启用自动代理 -->
+	<aop:config>
+        <aop:pointcut id="serviceMethods" expression="execution(* aop.MyService.save(..))"/>
+        <aop:advisor advice-ref="logingAdcive" pointcut-ref="serviceMethods"/>
+    </aop:config>
+
+</beans>

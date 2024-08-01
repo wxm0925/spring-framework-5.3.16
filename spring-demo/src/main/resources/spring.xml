@@ -7,11 +7,19 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-
+	
 	<context:property-placeholder location="qqq.properties"></context:property-placeholder>
-	<context:property-placeholder location="bbb.properties"></context:property-placeholder>
-
-	<bean id="xxxService" class="XxxService">
+	
+	<bean id="xxxService" class="myaop.XxxService">
 		<property name="name" value="${name}"></property>
+		<property name="email" value="673085055@qq.com"></property>
 	</bean>
+	
+	<context:annotation-config></context:annotation-config>
+	<context:component-scan base-package="myaop"/>
+	<aop:aspectj-autoproxy/>
+	<!--<bean id="b" class="MyBeanFactoryPostProcessor"></bean>
+	
+	<bean id="systemCLoseEventPublisher" class="eventdemo.springevent.SystemCloseEventPublisher"></bean>
+	<bean id="systemCLoseEventListener" class="eventdemo.springevent.SystemCloseListener"></bean>-->
 </beans>
