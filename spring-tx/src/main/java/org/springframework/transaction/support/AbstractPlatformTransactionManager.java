@@ -347,17 +347,19 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		Object transaction = doGetTransaction();
 		boolean debugEnabled = logger.isDebugEnabled();
 
+		//是否存在事物，存在的话找出传播行为并处理
 		if (isExistingTransaction(transaction)) {
 			// Existing transaction found -> check propagation behavior to find out how to behave.
 			return handleExistingTransaction(def, transaction, debugEnabled);
 		}
-
+		//事物的超时时间，-1表示是数据库默认的超时时间
 		// Check definition settings for new transaction.
 		if (def.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
 			throw new InvalidTimeoutException("Invalid transaction timeout", def.getTimeout());
 		}
 
 		// No existing transaction found -> check propagation behavior to find out how to proceed.
+		//代码走到这里，说明当前没有事物。然后def使用的是强制性的事物，抛异常
 		if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
 			throw new IllegalTransactionStateException(
 					"No existing transaction found for transaction marked with propagation 'mandatory'");
@@ -367,7 +369,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 			SuspendedResourcesHolder suspendedResources = suspend(null);
 			if (debugEnabled) {
-				logger.debug("Creating new transaction with name [" + def.getName() + "]: " + def);
+				logger.debug("创建新事物，名称为 [" + def.getName() + "]: " + def);
 			}
 			try {
 				return startTransaction(def, transaction, debugEnabled, suspendedResources);

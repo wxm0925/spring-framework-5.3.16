@@ -22,9 +22,9 @@ sourceSets {
 	main.java.srcDirs = []
 }
 
-compileGroovy {
-	options.compilerArgs += "-Werror"
-}
+//compileGroovy {
+//	options.compilerArgs += "-Werror"
+//}
 
 // This module also builds Kotlin code and the compileKotlin task naturally depends on
 // compileJava. We need to redefine dependencies to break task cycles.

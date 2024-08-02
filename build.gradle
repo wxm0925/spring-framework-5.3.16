@@ -305,6 +305,9 @@ configure(allprojects) { project ->
 	}
 
 	allprojects {
+		tasks.withType(JavaCompile) {
+			options.incremental = true  // 启用增量编译
+		}
 		repositories {
 			maven{
 				allowInsecureProtocol = true
