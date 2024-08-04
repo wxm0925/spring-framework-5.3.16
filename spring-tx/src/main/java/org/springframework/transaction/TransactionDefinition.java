@@ -111,8 +111,8 @@ public interface TransactionDefinition {
 	int PROPAGATION_NOT_SUPPORTED = 4;
 
 	/**
-	 * Do not support a current transaction; throw an exception if a current transaction
-	 * exists. Analogous to the EJB transaction attribute of the same name.
+	 * 不支持当前事务；如果存在当前事务，则抛出异常。类似于同名的 EJB 事务属性。
+	 * 请注意，事务同步在PROPAGATION_NEVER范围内不可用
 	 * <p>Note that transaction synchronization is <i>not</i> available within a
 	 * {@code PROPAGATION_NEVER} scope.
 	 */

@@ -19,5 +19,6 @@ public class App {
 
 		OrderService bean = context.getBean(OrderService.class);
 		bean.createOrder("22");
+		System.out.println("bean=" + bean);
 	}
 }

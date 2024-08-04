@@ -7,5 +7,5 @@ package aop1X;
  * @date 2024/8/2
  */
 public interface UserService {
-	void getUsers();
+	String getUsers();
 }

@@ -21,6 +21,13 @@ public class ProxyFactoryTest {
 		advisor.setAdvice(methodArgsPrintAdvice);
 		proxyFactory.addAdvisors(advisor);
 
+		NameMatchMethodPointcutAdvisor advisor2 = new NameMatchMethodPointcutAdvisor();
+		advisor2.setMappedName("getUsers");
+		InvokeResultPringAdvice invokeResultPringAdvice = new InvokeResultPringAdvice();
+		advisor2.setAdvice(invokeResultPringAdvice);
+		proxyFactory.addAdvisors(advisor2);
+
+		proxyFactory.setInterfaces(UserService.class);
 		UserService userService = (UserService) proxyFactory.getProxy();
 		userService.getUsers();
 	}

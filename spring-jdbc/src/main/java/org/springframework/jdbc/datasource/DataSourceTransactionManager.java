@@ -16,23 +16,18 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.support.AbstractPlatformTransactionManager;
-import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.ResourceTransactionManager;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionSynchronizationUtils;
+import org.springframework.transaction.support.*;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager}
@@ -238,10 +233,18 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		return obtainDataSource();
 	}
 
+	/**
+	 * 获取事务对象
+	 * @return
+	 */
 	@Override
 	protected Object doGetTransaction() {
+		//创建事务对象
 		DataSourceTransactionObject txObject = new DataSourceTransactionObject();
+		//允许保存点
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
+		//从同步管理器中获取ConnectionHolder，已数据源作为键
+		//若当前不存在事务
 		ConnectionHolder conHolder =
 				(ConnectionHolder) TransactionSynchronizationManager.getResource(obtainDataSource());
 		txObject.setConnectionHolder(conHolder, false);
@@ -282,7 +285,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			if (con.getAutoCommit()) {
 				txObject.setMustRestoreAutoCommit(true);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Switching JDBC Connection [" + con + "] to manual commit");
+					logger.debug("切换jdbc连接 [" + con + "] 为手动提交");
 				}
 				con.setAutoCommit(false);
 			}

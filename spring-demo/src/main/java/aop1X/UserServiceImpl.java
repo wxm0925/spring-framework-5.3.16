@@ -1,5 +1,7 @@
 package aop1X;
 
+import java.util.Random;
+
 /**
  * Demo class
  *
@@ -8,7 +10,7 @@ package aop1X;
  */
 public class UserServiceImpl implements UserService{
 	@Override
-	public void getUsers() {
-
+	public String getUsers() {
+		return "user" + new Random().nextInt();
 	}
 }
