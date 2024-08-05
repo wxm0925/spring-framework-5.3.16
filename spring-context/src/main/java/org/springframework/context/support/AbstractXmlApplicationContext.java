@@ -85,6 +85,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 		因为DefaultListableBeanFactory间接实现了BeanDefinitionRegister接口，
 		可以注册Bean
 		* */
+		//初始化资源加载器
 		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 
 		// Configure the bean definition reader with this context's
