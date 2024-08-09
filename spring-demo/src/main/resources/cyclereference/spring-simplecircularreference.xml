@@ -7,7 +7,20 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-	
-	<bean id="orderService" class="beandefinitionload01.OrderService"></bean>
-	
+<!--	<bean id="useService" class="cyclereference.UserService">
+		<property name="orderService" ref="orderService"/>
+	</bean>
+	<bean id="orderService" class="cyclereference.OrderService">
+		<property name="userService" ref="useService"></property>
+	</bean>-->
+
+	<!--构造器注入，无法解决循环依赖-->
+	<bean id="userService" class="cyclereference.UserService">
+		<constructor-arg ref="orderService"></constructor-arg>
+
+	</bean>
+	<bean id="orderService" class="cyclereference.OrderService">
+		<constructor-arg ref="userService"></constructor-arg>
+	</bean>
+
 </beans>

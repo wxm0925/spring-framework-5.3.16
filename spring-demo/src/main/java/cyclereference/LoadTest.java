@@ -1,4 +1,4 @@
-package beandefinitionload01;
+package cyclereference;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -10,7 +10,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class LoadTest {
 	public static void main(String[] args) {
-		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("beandefinitionload01/spring-beandefinitionload01.xml");
+		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("cyclereference/spring-simplecircularreference.xml");
 		OrderService bean = applicationContext.getBean(OrderService.class);
 		bean.saveOrder();
 	}

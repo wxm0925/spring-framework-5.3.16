@@ -295,7 +295,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					return (T) parentBeanFactory.getBean(nameToLookup);
 				}
 			}
-
+			//标记为已创建
 			if (!typeCheckOnly) {
 				markBeanAsCreated(beanName);
 			}
