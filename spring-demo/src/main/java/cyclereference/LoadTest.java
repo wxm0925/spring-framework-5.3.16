@@ -11,7 +11,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class LoadTest {
 	public static void main(String[] args) {
 		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("cyclereference/spring-simplecircularreference.xml");
-		OrderService bean = applicationContext.getBean(OrderService.class);
-		bean.saveOrder();
+		System.out.println(applicationContext);
 	}
 }
