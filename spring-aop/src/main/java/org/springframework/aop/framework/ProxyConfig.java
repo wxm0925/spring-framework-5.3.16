@@ -1,28 +1,13 @@
-/*
- * Copyright 2002-2021 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.springframework.aop.framework;
-
-import java.io.Serializable;
 
 import org.springframework.util.Assert;
 
+import java.io.Serializable;
+
 /**
- * Convenience superclass for configuration used in creating proxies,
- * to ensure that all proxy creators have consistent properties.
+ * 用于创建代理时的通用配置类，确保所有代理创建器使用一致的配置属性。
+ *
+ * 常用于继承构建 AOP 配置支持类（如 AdvisedSupport）。
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -30,124 +15,105 @@ import org.springframework.util.Assert;
  */
 public class ProxyConfig implements Serializable {
 
-	/** use serialVersionUID from Spring 1.2 for interoperability. */
+	/** 为了兼容 Spring 1.2 的版本，保持相同的序列化 ID。 */
 	private static final long serialVersionUID = -8409359707199703185L;
 
-	/** 决定是否使用CGLIB代理来代理目标类 */
+	/**
+	 * 是否强制使用 CGLIB 代理类，而不是基于接口的 JDK 动态代理。
+	 * 默认为 false，即优先使用接口代理。
+	 *
+	 * 若设置为 true：
+	 * - 若目标是接口，仍使用 JDK 代理；
+	 * - 若目标是普通类，则使用 CGLIB 创建子类代理。
+	 */
 	private boolean proxyTargetClass = false;
 
+	/**
+	 * 是否启用优化模式，通常与 CGLIB 配合使用。
+	 * 默认为 false。
+	 *
+	 * 注意：开启后可能会跳过一些代理类的合法性校验（例如 final 方法），
+	 * 主要用于性能调优场景。
+	 */
 	private boolean optimize = false;
 
+	/**
+	 * 是否隐藏代理的真实身份，禁止将代理对象强转为 {@link Advised} 接口。
+	 * 默认为 false，即允许外部访问代理的元数据（Advice 列表等）。
+	 */
 	boolean opaque = false;
 
+	/**
+	 * 是否将代理对象暴露为线程本地变量（ThreadLocal），以便通过 {@link AopContext} 获取。
+	 * 默认为 false。
+	 *
+	 * 如果需要在代理对象内部调用自身的另一个被通知方法，应设置为 true。
+	 * 否则直接使用 this 调用会绕过 AOP 拦截器链。
+	 */
 	boolean exposeProxy = false;
 
+	/**
+	 * 是否冻结当前代理配置，防止 Advice 被动态更改。
+	 * 默认为 false。
+	 *
+	 * 冻结后可提高运行时性能，并避免运行时误修改代理行为。
+	 */
 	private boolean frozen = false;
 
-
-	/**
-	 * Set whether to proxy the target class directly, instead of just proxying
-	 * specific interfaces. Default is "false".
-	 * <p>Set this to "true" to force proxying for the TargetSource's exposed
-	 * target class. If that target class is an interface, a JDK proxy will be
-	 * created for the given interface. If that target class is any other class,
-	 * a CGLIB proxy will be created for the given class.
-	 * <p>Note: Depending on the configuration of the concrete proxy factory,
-	 * the proxy-target-class behavior will also be applied if no interfaces
-	 * have been specified (and no interface autodetection is activated).
-	 * @see org.springframework.aop.TargetSource#getTargetClass()
-	 */
+	/** 设置是否强制使用类代理（即 CGLIB 代理） */
 	public void setProxyTargetClass(boolean proxyTargetClass) {
 		this.proxyTargetClass = proxyTargetClass;
 	}
 
-	/**
-	 * Return whether to proxy the target class directly as well as any interfaces.
-	 */
+	/** 获取是否使用类代理（CGLIB） */
 	public boolean isProxyTargetClass() {
 		return this.proxyTargetClass;
 	}
 
-	/**
-	 * Set whether proxies should perform aggressive optimizations.
-	 * The exact meaning of "aggressive optimizations" will differ
-	 * between proxies, but there is usually some tradeoff.
-	 * Default is "false".
-	 * <p>With Spring's current proxy options, this flag effectively
-	 * enforces CGLIB proxies (similar to {@link #setProxyTargetClass})
-	 * but without any class validation checks (for final methods etc).
-	 */
+	/** 设置是否开启优化模式 */
 	public void setOptimize(boolean optimize) {
 		this.optimize = optimize;
 	}
 
-	/**
-	 * Return whether proxies should perform aggressive optimizations.
-	 */
+	/** 获取是否处于优化模式 */
 	public boolean isOptimize() {
 		return this.optimize;
 	}
 
-	/**
-	 * Set whether proxies created by this configuration should be prevented
-	 * from being cast to {@link Advised} to query proxy status.
-	 * <p>Default is "false", meaning that any AOP proxy can be cast to
-	 * {@link Advised}.
-	 */
+	/** 设置代理是否不可被强转为 {@link Advised} */
 	public void setOpaque(boolean opaque) {
 		this.opaque = opaque;
 	}
 
-	/**
-	 * Return whether proxies created by this configuration should be
-	 * prevented from being cast to {@link Advised}.
-	 */
+	/** 获取代理是否不可被强转为 {@link Advised} */
 	public boolean isOpaque() {
 		return this.opaque;
 	}
 
-	/**
-	 * Set whether the proxy should be exposed by the AOP framework as a
-	 * ThreadLocal for retrieval via the AopContext class. This is useful
-	 * if an advised object needs to call another advised method on itself.
-	 * (If it uses {@code this}, the invocation will not be advised).
-	 * <p>Default is "false", in order to avoid unnecessary extra interception.
-	 * This means that no guarantees are provided that AopContext access will
-	 * work consistently within any method of the advised object.
-	 */
+	/** 设置是否暴露当前代理对象（用于 AopContext.getCurrentProxy） */
 	public void setExposeProxy(boolean exposeProxy) {
 		this.exposeProxy = exposeProxy;
 	}
 
-	/**
-	 * Return whether the AOP proxy will expose the AOP proxy for
-	 * each invocation.
-	 */
+	/** 获取是否暴露当前代理对象 */
 	public boolean isExposeProxy() {
 		return this.exposeProxy;
 	}
 
-	/**
-	 * Set whether this config should be frozen.
-	 * <p>When a config is frozen, no advice changes can be made. This is
-	 * useful for optimization, and useful when we don't want callers to
-	 * be able to manipulate configuration after casting to Advised.
-	 */
+	/** 设置是否冻结该代理配置，不再允许添加/修改 Advice */
 	public void setFrozen(boolean frozen) {
 		this.frozen = frozen;
 	}
 
-	/**
-	 * Return whether the config is frozen, and no advice changes can be made.
-	 */
+	/** 获取该配置是否被冻结 */
 	public boolean isFrozen() {
 		return this.frozen;
 	}
 
-
 	/**
-	 * Copy configuration from the other config object.
-	 * @param other object to copy configuration from
+	 * 从另一个 ProxyConfig 对象中复制所有配置属性。
+	 *
+	 * @param other 要复制配置的对象，不能为空
 	 */
 	public void copyFrom(ProxyConfig other) {
 		Assert.notNull(other, "Other ProxyConfig object must not be null");

@@ -16,18 +16,10 @@
 
 package org.springframework.aop.framework;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -35,50 +27,52 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.UnknownAdviceTypeException;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.FactoryBeanNotInitializedException;
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.*;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * {@link org.springframework.beans.factory.FactoryBean} implementation that builds an
- * AOP proxy based on beans in Spring {@link org.springframework.beans.factory.BeanFactory}.
+ * {@link org.springframework.beans.factory.FactoryBean} 的实现类，
+ * 该类基于 Spring {@link org.springframework.beans.factory.BeanFactory} 中的 Bean 构建 AOP 代理。
  *
- * <p>{@link org.aopalliance.intercept.MethodInterceptor MethodInterceptors} and
- * {@link org.springframework.aop.Advisor Advisors} are identified by a list of bean
- * names in the current bean factory, specified through the "interceptorNames" property.
- * The last entry in the list can be the name of a target bean or a
- * {@link org.springframework.aop.TargetSource}; however, it is normally preferable
- * to use the "targetName"/"target"/"targetSource" properties instead.
+ * <p>{@link org.aopalliance.intercept.MethodInterceptor MethodInterceptors}
+ * 和 {@link org.springframework.aop.Advisor Advisors} 会通过属性 "interceptorNames"
+ * 指定的一组 Bean 名称在当前 BeanFactory 中被识别出来。
+ * 列表的最后一个条目可以是目标 Bean 的名称，或者是
+ * {@link org.springframework.aop.TargetSource}；
+ * 但通常更推荐使用 "targetName"、"target" 或 "targetSource" 属性来指定目标对象。
  *
- * <p>Global interceptors and advisors can be added at the factory level. The specified
- * ones are expanded in an interceptor list where an "xxx*" entry is included in the
- * list, matching the given prefix with the bean names (e.g. "global*" would match
- * both "globalBean1" and "globalBean2", "*" all defined interceptors). The matching
- * interceptors get applied according to their returned order value, if they implement
- * the {@link org.springframework.core.Ordered} interface.
+ * <p>可以在工厂级别添加全局拦截器（interceptor）和增强器（advisor）。
+ * 在 interceptorNames 中，如果有以 "xxx*" 结尾的条目，
+ * Spring 会根据该前缀匹配出所有符合的拦截器 Bean（例如 "global*" 会匹配 "globalBean1" 和 "globalBean2"，
+ * "*" 则匹配所有定义的拦截器）。
+ * 如果这些拦截器实现了 {@link org.springframework.core.Ordered} 接口，
+ * 它们将会按返回的顺序值应用。
  *
- * <p>Creates a JDK proxy when proxy interfaces are given, and a CGLIB proxy for the
- * actual target class if not. Note that the latter will only work if the target class
- * does not have final methods, as a dynamic subclass will be created at runtime.
+ * <p>当设置了代理接口时，会创建 JDK 动态代理；
+ * 如果没有指定接口，则对实际目标类创建 CGLIB 代理。
+ * 注意：后者仅适用于目标类没有 `final` 方法的情况，
+ * 因为运行时会生成一个该类的动态子类。
  *
- * <p>It's possible to cast a proxy obtained from this factory to {@link Advised},
- * or to obtain the ProxyFactoryBean reference and programmatically manipulate it.
- * This won't work for existing prototype references, which are independent. However,
- * it will work for prototypes subsequently obtained from the factory. Changes to
- * interception will work immediately on singletons (including existing references).
- * However, to change interfaces or target it's necessary to obtain a new instance
- * from the factory. This means that singleton instances obtained from the factory
- * do not have the same object identity. However, they do have the same interceptors
- * and target, and changing any reference will change all objects.
+ * <p>通过该工厂生成的代理对象可以被强制转换为 {@link Advised}，
+ * 也可以获取 ProxyFactoryBean 本身，并通过编程方式进行操作。
+ * 这一点对于已经创建的 prototype（原型）Bean 不适用，因为它们是独立的；
+ * 但对于之后从该工厂获取的 prototype 是适用的。
+ * 拦截器的变更对于 singleton（单例） Bean 是立即生效的（包括已经创建的实例）。
+ * 然而，如果要变更接口或目标对象，则必须重新从工厂中获取新的实例。
+ * 这意味着，从该工厂中获取的 singleton 实例并不具有相同的对象身份（identity），
+ * 但它们确实拥有相同的拦截器和目标对象，
+ * 对任一引用的修改都会影响到所有对象。
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -88,6 +82,7 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.aop.Advisor
  * @see Advised
  */
+
 @SuppressWarnings("serial")
 public class ProxyFactoryBean extends ProxyCreatorSupport
 		implements FactoryBean<Object>, BeanClassLoaderAware, BeanFactoryAware {
