@@ -75,7 +75,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Set of registered singletons, containing the bean names in registration order. */
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
-	/** Names of beans that are currently in creation. */
+	/** 正在创建的beanName */
 	private final Set<String> singletonsCurrentlyInCreation =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
@@ -158,6 +158,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * 核心作用是 从不同级别的缓存中获取指定名称的单例对象，并处理 循环依赖 的场景。
+	 *
+	 缓存名称	类型	描述
+	 singletonObjects	    一级缓存	存放已完全创建好的单例 Bean
+	 earlySingletonObjects	二级缓存	存放正在创建中的 Bean 的“半成品”引用（解决循环依赖）
+	 singletonFactories	    三级缓存	存放 ObjectFactory，用于生成早期 Bean 引用
 	 * Return the (raw) singleton object registered under the given name.
 	 * <p>Checks already instantiated singletons and also allows for an early
 	 * reference to a currently created singleton (resolving a circular reference).
@@ -167,10 +173,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
-		// Quick check for existing instance without full singleton lock
+		// 先从一级缓存中查找：如果 Bean 已经创建完成，直接返回。
 		Object singletonObject = this.singletonObjects.get(beanName);
+		//判断当前 Bean 是否正处于创建中状态，这是为了处理循环依赖。
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+			//如果还没创建完成，则尝试从二级缓存中获取：这里是“半成品”对象。
 			singletonObject = this.earlySingletonObjects.get(beanName);
+			//如果还没找到，并允许提前引用（allowEarlyReference == true），进入同步块。
 			if (singletonObject == null && allowEarlyReference) {
 				synchronized (this.singletonObjects) {
 					// Consistent creation of early reference within full singleton lock
@@ -178,6 +187,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					if (singletonObject == null) {
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
+							//从三级缓存拿到ObjectFactory，然后getObject放到二级缓存中，删除三级缓存
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
 								singletonObject = singletonFactory.getObject();
@@ -203,7 +213,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(beanName, "Bean name must not be null");
 		synchronized (this.singletonObjects) {
-			//一级缓存中有没有
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
 				if (this.singletonsCurrentlyInDestruction) {
@@ -342,7 +351,15 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void beforeSingletonCreation(String beanName) {
-		if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.add(beanName)) {
+		// 如果在排除检查的列表里，直接跳过，不处理
+		if (this.inCreationCheckExclusions.contains(beanName)) {
+			return;
+		}
+
+		// 尝试将 beanName 添加到正在创建的集合中
+		// 如果已经存在，说明是重复创建，抛出异常
+		boolean firstTimeCreating = this.singletonsCurrentlyInCreation.add(beanName);
+		if (!firstTimeCreating) {
 			throw new BeanCurrentlyInCreationException(beanName);
 		}
 	}
@@ -354,7 +371,15 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void afterSingletonCreation(String beanName) {
-		if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.remove(beanName)) {
+		// 如果这个 bean 被排除在检查之外，什么都不做
+		if (this.inCreationCheckExclusions.contains(beanName)) {
+			return;
+		}
+
+		// 从“正在创建的单例”集合中移除
+		// 如果移除失败，说明它根本不在创建中，抛出异常
+		boolean wasInCreation = this.singletonsCurrentlyInCreation.remove(beanName);
+		if (!wasInCreation) {
 			throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
 		}
 	}

@@ -516,43 +516,43 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		synchronized (this.startupShutdownMonitor) {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
-			// 准备此上下文以供刷新。
+			// 1. 准备容器（设置启动时间、标记状态）
 			prepareRefresh();
 
-			// 告诉子类刷新内部bean工厂。
+			// 2. 获取 BeanFactory（并加载 Bean 定义）
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
-			// Prepare the bean factory for use in this context.
+			// 3. 准备 BeanFactory（注册一些内部 Bean，如环境、Aware 等）
 			prepareBeanFactory(beanFactory);
 
 			try {
-				// Allows post-processing of the bean factory in context subclasses.
+				// 4. 子类扩展点（留给子类，比如 Web 容器）
 				postProcessBeanFactory(beanFactory);
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
-				// Invoke factory processors registered as beans in the context.
+				// 5. 执行 BeanFactoryPostProcessor（可以修改 Bean 定义）
 				invokeBeanFactoryPostProcessors(beanFactory);
 
-				// Register bean processors that intercept bean creation.
+				// 6. 注册 BeanPostProcessor（Bean 实例化后增强）
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
-				// 初始化国际化资源，其实就是把name=messageSource的bean给自己的属性
+				// 7. 初始化消息源（国际化）
 				initMessageSource();
 
-				// Initialize event multicaster for this context.
+				// 8. 初始化事件广播器
 				initApplicationEventMulticaster();
 
-				// Initialize other special beans in specific context subclasses.
+				// 9. 留给子类扩展（注册监听器等）
 				onRefresh();
 
-				// Check for listener beans and register them.
+				// 10. 注册 ApplicationListener 监听器
 				registerListeners();
 
-				// Instantiate all remaining (non-lazy-init) singletons.
+				// 11. 实例化所有非懒加载的 singleton Bean（重点）
 				finishBeanFactoryInitialization(beanFactory);
 
-				// Last step: publish corresponding event.
+				// 12. 最后一步，发布事件，标记容器刷新完成
 				finishRefresh();
 			}
 
